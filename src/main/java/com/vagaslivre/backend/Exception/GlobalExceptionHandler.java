@@ -10,8 +10,8 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleUserNotFound(UserNotFoundException e) {
+    @ExceptionHandler(ErrorMessageException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFound(ErrorMessageException e) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", e.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);

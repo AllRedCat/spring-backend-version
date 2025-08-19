@@ -1,20 +1,20 @@
 package com.vagaslivre.backend.Service;
 
+import com.vagaslivre.backend.DTO.UserCreateDTO;
 import com.vagaslivre.backend.DTO.UserDTO;
-import com.vagaslivre.backend.Exception.UserNotFoundException;
+import com.vagaslivre.backend.Exception.ErrorMessageException;
 import com.vagaslivre.backend.Mapper.UserMapper;
 import com.vagaslivre.backend.Model.User;
 import com.vagaslivre.backend.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+        public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -30,25 +30,27 @@ public class UserService {
     public UserDTO getUserById(Long id) {
         return userRepository.findById(id)
                 .map(UserMapper::toUserDTO)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ErrorMessageException("User not found"));
     }
 
     // Get User by CPF
     public UserDTO getUserByCpf(String cpf) {
         return userRepository.findByCpf(cpf)
                 .map(UserMapper::toUserDTO)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ErrorMessageException("User not found"));
     }
 
     // Create a new User
-    public User createUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email already registered");
+    public UserDTO createUser(UserCreateDTO createDTO) {
+        if (userRepository.existsByCpf(createDTO.getCpf())) {
+            throw new ErrorMessageException("A User with the CPF already exists");
         }
-        if (userRepository.existsByCpf(user.getCpf())) {
-            throw new IllegalArgumentException("CPF already registered");
+        if (userRepository.existsByEmail(createDTO.getEmail())) {
+            throw new ErrorMessageException("A User with the email already exists");
         }
-        return userRepository.save(user);
+        User newUser = UserMapper.toUser(createDTO);
+        User createdUser = userRepository.save(newUser);
+        return UserMapper.toUserDTO(createdUser);
     }
 
     // Update a User

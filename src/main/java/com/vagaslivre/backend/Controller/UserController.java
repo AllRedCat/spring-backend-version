@@ -1,8 +1,13 @@
 package com.vagaslivre.backend.Controller;
 
+import com.vagaslivre.backend.DTO.UserCreateDTO;
 import com.vagaslivre.backend.DTO.UserDTO;
 import com.vagaslivre.backend.Model.User;
 import com.vagaslivre.backend.Service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "Users", description = "User CRUD")
 public class UserController {
     private final UserService userService;
 
@@ -19,6 +25,11 @@ public class UserController {
     }
 
     // GET all
+    @Operation(summary = "Get all users", description = "Returns a list of all registered users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful retrieval"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+    })
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAll() {
         return ResponseEntity.ok(userService.getAllUsers());
@@ -38,9 +49,9 @@ public class UserController {
 
     // POST new User
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody User user) {
+    public ResponseEntity<Object> createUser(@RequestBody UserCreateDTO createDTO) {
         try {
-            User createdUser = userService.createUser(user);
+            UserDTO createdUser = userService.createUser(createDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity
